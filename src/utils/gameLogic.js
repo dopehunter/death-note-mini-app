@@ -320,6 +320,22 @@ const caseTranslations = {
     ]
 };
 
+// Correct Russian cases to ensure proper ID types
+const russianCases = caseTranslations.ru.map(c => {
+    // Ensure case ID is a number, not a string
+    return {
+        ...c,
+        id: Number(c.id)
+    };
+});
+
+// Update with corrected cases
+caseTranslations.ru = russianCases;
+
+// Apply the same fix to other languages for consistency
+caseTranslations.en = caseTranslations.en.map(c => ({...c, id: Number(c.id)}));
+caseTranslations.de = caseTranslations.de.map(c => ({...c, id: Number(c.id)}));
+
 // Make caseTranslations accessible globally for other scripts
 window.caseTranslations = caseTranslations;
 
@@ -367,21 +383,23 @@ function initGame() {
 
 // Load a specific case
 function loadCase(caseId) {
-    console.log(`loadCase(${caseId}) called - current language: ${getLanguage()}`);
+    // Ensure caseId is a number
+    const numericCaseId = Number(caseId);
+    console.log(`loadCase(${numericCaseId}) called - current language: ${getLanguage()}`);
     
     // Force refresh case data based on current language
     const currentCases = getCases();
-    console.log("Available cases:", currentCases.map(c => `ID: ${c.id}, Title: ${c.title}`));
+    console.log("Available cases:", currentCases.map(c => `ID: ${c.id} (${typeof c.id}), Title: ${c.title}`));
     
-    // Find the case
-    const caseData = currentCases.find(c => c.id === caseId);
+    // Find the case - use Number() for type-safe comparison
+    const caseData = currentCases.find(c => Number(c.id) === numericCaseId);
     
     if (!caseData) {
-        console.error(`Case with ID ${caseId} not found in language ${getLanguage()}`);
+        console.error(`Case with ID ${numericCaseId} not found in language ${getLanguage()}`);
         // Try to find the case in the default English locale if it's missing in current locale
         if (getLanguage() !== 'en') {
             console.log("Trying to find case in English as fallback...");
-            const englishCaseData = caseTranslations.en.find(c => c.id === caseId);
+            const englishCaseData = caseTranslations.en.find(c => Number(c.id) === numericCaseId);
             if (englishCaseData) {
                 console.log("Case found in English, using as fallback");
                 return loadCaseWithData(englishCaseData);

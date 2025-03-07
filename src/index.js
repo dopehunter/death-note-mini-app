@@ -256,21 +256,21 @@ function showResults(solved) {
 
 // Go to the next case
 function nextCase() {
-    // Get the current case ID
-    const currentCaseId = gameState?.currentCase?.id || 0;
-    console.log("Current case ID:", currentCaseId);
+    // Get the current case ID as a number
+    const currentCaseId = Number(gameState?.currentCase?.id || 0);
+    console.log("Current case ID:", currentCaseId, "type:", typeof currentCaseId);
     
     // Calculate the next case ID (increment by 1)
     const nextCaseId = currentCaseId + 1;
-    console.log("Next case ID:", nextCaseId);
+    console.log("Next case ID:", nextCaseId, "type:", typeof nextCaseId);
     
     // Get all available cases
     const allCases = getCases();
     console.log("Available cases:", allCases.length, "Current language:", getLanguage());
-    console.log("Case IDs:", allCases.map(c => c.id));
+    console.log("Case IDs:", allCases.map(c => `${c.id} (${typeof c.id})`));
     
-    // Check if the next case exists
-    const nextCaseExists = allCases.some(c => c.id === nextCaseId);
+    // Check if the next case exists - using Number() for type-safe comparison
+    const nextCaseExists = allCases.some(c => Number(c.id) === nextCaseId);
     console.log("Next case exists:", nextCaseExists);
     
     if (nextCaseExists) {
