@@ -221,7 +221,7 @@ function viewEvidence() {
     
     // Create evidence header
     const header = document.createElement('h3');
-    header.textContent = 'Evidence';
+    header.textContent = translate('evidence');
     caseBoard.appendChild(header);
     
     // Create evidence list
@@ -243,7 +243,7 @@ function viewEvidence() {
     // Add back button
     const backButton = document.createElement('button');
     backButton.className = 'secondary-button';
-    backButton.textContent = 'Back to Case';
+    backButton.textContent = translate('backToCase');
     backButton.addEventListener('click', () => loadCaseBoard(gameState.currentCase));
     caseBoard.appendChild(backButton);
     
@@ -260,7 +260,7 @@ function viewSuspects() {
     
     // Create suspects header
     const header = document.createElement('h3');
-    header.textContent = 'Suspects';
+    header.textContent = translate('suspects');
     caseBoard.appendChild(header);
     
     // Create suspects list
@@ -278,7 +278,7 @@ function viewSuspects() {
         if (!isKilled) {
             cluesHtml = `
                 <div class="suspect-clues">
-                    <h5>Clues:</h5>
+                    <h5>${translate('clues')}:</h5>
                     <ul>
                         ${suspect.clues.map(clue => `<li>${clue}</li>`).join('')}
                     </ul>
@@ -287,7 +287,7 @@ function viewSuspects() {
         }
         
         suspectItem.innerHTML = `
-            <h4>${suspect.name} ${isKilled ? '(Deceased)' : ''}</h4>
+            <h4>${suspect.name} ${isKilled ? `(${translate('deceased')})` : ''}</h4>
             <p>${suspect.description}</p>
             ${cluesHtml}
         `;
@@ -299,7 +299,7 @@ function viewSuspects() {
     // Add back button
     const backButton = document.createElement('button');
     backButton.className = 'secondary-button';
-    backButton.textContent = 'Back to Case';
+    backButton.textContent = translate('backToCase');
     backButton.addEventListener('click', () => loadCaseBoard(gameState.currentCase));
     caseBoard.appendChild(backButton);
     
@@ -316,30 +316,30 @@ function attemptSolve() {
     
     // Create solve header
     const header = document.createElement('h3');
-    header.textContent = 'Solve the Case';
+    header.textContent = translate('solveCase');
     caseBoard.appendChild(header);
     
     // Create solve form
     const solveForm = document.createElement('div');
     solveForm.className = 'solve-form';
     solveForm.innerHTML = `
-        <p>Who do you believe is the culprit behind these crimes?</p>
+        <p>${translate('chooseCulprit')}</p>
         <div class="suspect-options">
             ${gameState.currentCase.suspects.map(suspect => `
                 <div class="suspect-option">
                     <input type="radio" id="suspect-${suspect.id}" name="culprit" value="${suspect.name}" ${gameState.killedSuspects.includes(suspect.name) ? 'disabled' : ''}>
-                    <label for="suspect-${suspect.id}">${suspect.name} ${gameState.killedSuspects.includes(suspect.name) ? '(Deceased)' : ''}</label>
+                    <label for="suspect-${suspect.id}">${suspect.name} ${gameState.killedSuspects.includes(suspect.name) ? `(${translate('deceased')})` : ''}</label>
                 </div>
             `).join('')}
         </div>
-        <button id="submitSolution" class="main-button">Submit Solution</button>
+        <button id="submitSolution" class="main-button">${translate('submitSolution')}</button>
     `;
     caseBoard.appendChild(solveForm);
     
     // Add back button
     const backButton = document.createElement('button');
     backButton.className = 'secondary-button';
-    backButton.textContent = 'Cancel';
+    backButton.textContent = translate('cancel');
     backButton.addEventListener('click', () => loadCaseBoard(gameState.currentCase));
     caseBoard.appendChild(backButton);
     
@@ -348,7 +348,7 @@ function attemptSolve() {
         const selectedCulprit = document.querySelector('input[name="culprit"]:checked')?.value;
         
         if (!selectedCulprit) {
-            alert('Please select a suspect');
+            alert(translate('selectSuspect'));
             return;
         }
         

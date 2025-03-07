@@ -78,7 +78,18 @@ const translations = {
         caseFailedText: 'You failed to identify the true criminal or eliminated an innocent person.',
         
         // Footer
-        footer: 'Created by Ryuk • Light Yagami is watching'
+        footer: 'Created by Ryuk • Light Yagami is watching',
+        
+        // Additional translations
+        backToCase: 'Back to Case',
+        clues: 'Clues',
+        deceased: 'Deceased',
+        solveCase: 'Solve the Case',
+        chooseCulprit: 'Who do you believe is the culprit behind these crimes?',
+        submitSolution: 'Submit Solution',
+        cancel: 'Cancel',
+        selectSuspect: 'Please select a suspect',
+        closeDeathNote: 'Close Death Note',
     },
     
     // Russian
@@ -148,7 +159,18 @@ const translations = {
         caseFailedText: 'Вы не смогли выявить настоящего преступника или устранили невиновного человека.',
         
         // Footer
-        footer: 'Создано Рюком • Лайт Ягами наблюдает'
+        footer: 'Создано Рюком • Лайт Ягами наблюдает',
+        
+        // Additional translations
+        backToCase: 'Вернуться к делу',
+        clues: 'Улики',
+        deceased: 'Умер',
+        solveCase: 'Решить дело',
+        chooseCulprit: 'Кто, по вашему мнению, виновен в этих преступлениях?',
+        submitSolution: 'Отправить решение',
+        cancel: 'Отмена',
+        selectSuspect: 'Пожалуйста, выберите подозреваемого',
+        closeDeathNote: 'Закрыть Тетрадь Смерти',
     },
     
     // German
@@ -218,7 +240,18 @@ const translations = {
         caseFailedText: 'Du konntest den wahren Täter nicht identifizieren oder hast eine unschuldige Person beseitigt.',
         
         // Footer
-        footer: 'Erstellt von Ryuk • Light Yagami beobachtet'
+        footer: 'Erstellt von Ryuk • Light Yagami beobachtet',
+        
+        // Additional translations
+        backToCase: 'Zurück zum Fall',
+        clues: 'Hinweise',
+        deceased: 'Verstorben',
+        solveCase: 'Fall lösen',
+        chooseCulprit: 'Wen halten Sie für den Täter dieser Verbrechen?',
+        submitSolution: 'Lösung einreichen',
+        cancel: 'Abbrechen',
+        selectSuspect: 'Bitte wählen Sie einen Verdächtigen aus',
+        closeDeathNote: 'Death Note schließen',
     }
 };
 

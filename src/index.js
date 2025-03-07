@@ -272,15 +272,13 @@ function updateDynamicContent() {
     // Update dynamic texts that depend on values (like days left, note uses, etc.)
     const currentCase = gameState?.currentCase;
     if (currentCase) {
+        // Update days left text using translate with formatted value
         document.getElementById('daysLeft').textContent = 
-            getLanguage() === 'en' ? `Days left: ${gameState.daysLeft}` :
-            getLanguage() === 'ru' ? `Осталось дней: ${gameState.daysLeft}` :
-            `Verbleibende Tage: ${gameState.daysLeft}`;
+            translate('daysLeft').replace('5', gameState.daysLeft);
             
+        // Update note uses text using translate with formatted value
         document.getElementById('noteUses').textContent = 
-            getLanguage() === 'en' ? `Death Note uses: ${gameState.deathNoteUses}` :
-            getLanguage() === 'ru' ? `Использований Тетради: ${gameState.deathNoteUses}` :
-            `Death Note Verwendungen: ${gameState.deathNoteUses}`;
+            translate('noteUses').replace('3', gameState.deathNoteUses);
     }
     
     // Update Death Note button text if panel is open
