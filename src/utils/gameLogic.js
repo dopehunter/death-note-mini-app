@@ -320,12 +320,17 @@ const caseTranslations = {
     ]
 };
 
+// Make caseTranslations accessible globally for other scripts
+window.caseTranslations = caseTranslations;
+
 // Get current cases based on language
 function getCases() {
-    // Get language at function call time, not at module load time
     const currentLang = typeof window.getLanguage === 'function' ? window.getLanguage() : 'en';
     return caseTranslations[currentLang] || caseTranslations.en;
 }
+
+// Make getCases function globally accessible
+window.getCases = getCases;
 
 // Initialize the game
 function initGame() {
@@ -355,23 +360,24 @@ function loadCase(caseId) {
         return;
     }
     
-    // Update game state
+    // Reset game state for the new case
     gameState.currentCase = caseData;
     gameState.daysLeft = caseData.days;
     gameState.deathNoteUses = caseData.deathNoteUses;
-    gameState.suspects = caseData.suspects;
-    gameState.evidence = caseData.evidence;
-    gameState.killedSuspects = [];
+    gameState.killedSuspects = []; // Reset killed suspects for the new case
     
-    // Update UI
+    // Update UI elements
     document.getElementById('caseTitle').textContent = caseData.title;
-    document.getElementById('daysLeft').textContent = `Days left: ${caseData.days}`;
-    document.getElementById('noteUses').textContent = `Death Note uses: ${caseData.deathNoteUses}`;
+    
+    // Update the days left and Death Note uses display
+    updateDynamicContent();
     
     // Load the case board
     loadCaseBoard(caseData);
     
-    console.log(`Case ${caseId} loaded:`, caseData);
+    console.log(`Case ${caseId} loaded:`, caseData.title);
+    
+    return caseData;
 }
 
 // Get case description based on current language

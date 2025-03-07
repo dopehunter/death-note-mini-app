@@ -95,6 +95,9 @@ const translations = {
         hasDiedOfHeartAttack: 'has died of a heart attack.',
         mustUseDeathNoteFirst: 'You must use the Death Note to eliminate the culprit before solving the case.',
         culpritNotKilled: 'You have identified the correct culprit, but you need to eliminate them with the Death Note first.',
+        
+        // Game completion message
+        allCasesCompleted: 'Congratulations! You have completed all available cases. More challenges will be added in future updates.',
     },
     
     // Russian
@@ -181,6 +184,9 @@ const translations = {
         hasDiedOfHeartAttack: 'умер от сердечного приступа.',
         mustUseDeathNoteFirst: 'Вы должны использовать Тетрадь Смерти для устранения преступника, прежде чем решить дело.',
         culpritNotKilled: 'Вы определили правильного преступника, но сначала вам нужно устранить его с помощью Тетради Смерти.',
+        
+        // Game completion message
+        allCasesCompleted: 'Поздравляем! Вы прошли все доступные дела. Больше испытаний будет добавлено в будущих обновлениях.',
     },
     
     // German
@@ -267,6 +273,9 @@ const translations = {
         hasDiedOfHeartAttack: 'ist an einem Herzinfarkt gestorben.',
         mustUseDeathNoteFirst: 'Sie müssen das Death Note benutzen, um den Täter zu eliminieren, bevor Sie den Fall lösen können.',
         culpritNotKilled: 'Sie haben den richtigen Täter identifiziert, aber Sie müssen ihn zuerst mit dem Death Note eliminieren.',
+        
+        // Game completion message
+        allCasesCompleted: 'Herzlichen Glückwunsch! Sie haben alle verfügbaren Fälle abgeschlossen. Weitere Herausforderungen werden in zukünftigen Updates hinzugefügt.',
     }
 };
 

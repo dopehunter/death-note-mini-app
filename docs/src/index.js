@@ -72,6 +72,57 @@ function initApp() {
     document.getElementById('nextCaseBtn').addEventListener('click', nextCase);
     document.getElementById('shareResultsBtn').addEventListener('click', shareResults);
     document.getElementById('returnToMenuBtn').addEventListener('click', returnToMenu);
+
+    // Check if Telegram WebApp is available
+    const telegramApp = window.Telegram?.WebApp;
+    if (telegramApp) {
+        telegramApp.ready();
+        telegramApp.expand();
+        
+        // Set up main button if available
+        if (telegramApp.MainButton) {
+            telegramApp.MainButton.setText(translate('startGame'));
+            telegramApp.MainButton.onClick(() => startGame());
+            telegramApp.MainButton.show();
+        }
+        
+        // Get user info
+        const user = telegramApp.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('userInfo').textContent = user.first_name || 'Kira';
+        }
+        
+        // Set theme
+        if (telegramApp.colorScheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    }
+    
+    // Hide loading screen, show menu
+    hideAllScreens();
+    document.getElementById('languageScreen').classList.remove('hide');
+    
+    // Initialize the game
+    window.gameState = gameState;
+    
+    // Make sure getCases function is available in the window scope
+    // Important for the nextCase function to access cases
+    if (typeof window.getCases !== 'function') {
+        window.getCases = function() {
+            // If the original getCases from gameLogic isn't available, provide a fallback
+            if (typeof getCases === 'function') {
+                return getCases();
+            }
+            
+            // Fallback implementation - must match gameLogic.js logic
+            const currentLang = typeof window.getLanguage === 'function' ? 
+                window.getLanguage() : 'en';
+            
+            return window.caseTranslations?.[currentLang] || 
+                   window.caseTranslations?.en || 
+                   [];
+        };
+    }
 }
 
 // Show the rules screen
@@ -205,8 +256,39 @@ function showResults(solved) {
 
 // Go to the next case
 function nextCase() {
-    // For demo, just go back to menu
-    returnToMenu();
+    // Get the current case ID
+    const currentCaseId = gameState?.currentCase?.id || 0;
+    
+    // Calculate the next case ID (increment by 1)
+    const nextCaseId = currentCaseId + 1;
+    
+    // Get all available cases
+    const allCases = getCases();
+    
+    // Check if the next case exists
+    const nextCaseExists = allCases.some(c => c.id === nextCaseId);
+    
+    if (nextCaseExists) {
+        // Hide the results screen
+        document.getElementById('resultsScreen').classList.add('hide');
+        
+        // Load the next case
+        loadCase(nextCaseId);
+        
+        // Show the game screen
+        hideAllScreens();
+        document.getElementById('gameScreen').classList.remove('hide');
+        updateBackButton();
+    } else {
+        // If there are no more cases, return to the menu with a success message
+        returnToMenu();
+        
+        // Get translate function safely
+        const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
+        
+        // Show completion message
+        alert(translate('allCasesCompleted'));
+    }
 }
 
 // Share results with the Telegram chat
