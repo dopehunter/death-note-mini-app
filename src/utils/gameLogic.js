@@ -788,6 +788,3 @@ function consumeDay(days = 1) {
         showResults(false);
     }
 }
-
-// Make sure we have a fadeIn keyframe animation
-} 
