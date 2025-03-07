@@ -206,7 +206,7 @@ const caseTranslations = {
                     name: "Синго Мидо",
                     description: "Директор по маркетингу Ётсуба. Заинтересован в расширении компании.",
                     isGuilty: false,
-                    clues: ["Выступал против агрессивных стратегий приобретения в личных электронных письмах.", "Был в отпуске во время двух смертей.", "Имеет семейные связи с компанией одной из жертв."]
+                    clues: ["Выступал против агрессивных стратегий приобретения в личных электронных письмах.", "War während zwei Todesfällen im Urlaub.", "Hat familiäre Verbindungen zu einem der Unternehmen der Opfer."]
                 },
                 {
                     id: "s3",
@@ -529,6 +529,16 @@ function attemptSolve() {
     // Get translate function safely
     const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
+    // Validate that player has used Death Note at least once - 
+    // either the culprit must be killed or they've used at least one Death Note use
+    const hasUsedDeathNote = gameState.killedSuspects.length > 0 || 
+                             gameState.deathNoteUses < gameState.currentCase.deathNoteUses;
+    
+    if (!hasUsedDeathNote) {
+        alert(translate('mustUseDeathNoteFirst'));
+        return;
+    }
+    
     const caseBoard = document.getElementById('caseBoard');
     caseBoard.innerHTML = '';
     
@@ -543,12 +553,17 @@ function attemptSolve() {
     solveForm.innerHTML = `
         <p>${translate('chooseCulprit')}</p>
         <div class="suspect-options">
-            ${gameState.currentCase.suspects.map(suspect => `
-                <div class="suspect-option">
-                    <input type="radio" id="suspect-${suspect.id}" name="culprit" value="${suspect.name}" ${gameState.killedSuspects.includes(suspect.name) ? 'disabled' : ''}>
-                    <label for="suspect-${suspect.id}">${suspect.name} ${gameState.killedSuspects.includes(suspect.name) ? `(${translate('deceased')})` : ''}</label>
+            ${gameState.currentCase.suspects.map(suspect => {
+                const isKilled = gameState.killedSuspects.includes(suspect.name);
+                // Important change: Allow selecting killed suspects - only disable non-killed non-culprits
+                const isDisabled = false; // No suspects should be disabled for selection
+                return `
+                <div class="suspect-option ${isKilled ? 'killed' : ''}">
+                    <input type="radio" id="suspect-${suspect.id}" name="culprit" value="${suspect.name}" ${isDisabled ? 'disabled' : ''}>
+                    <label for="suspect-${suspect.id}">${suspect.name} ${isKilled ? `(${translate('deceased')})` : ''}</label>
                 </div>
-            `).join('')}
+                `;
+            }).join('')}
         </div>
         <button id="submitSolution" class="main-button">${translate('submitSolution')}</button>
     `;
@@ -576,8 +591,14 @@ function attemptSolve() {
         // Check if the culprit is dead
         const isCulpritKilled = gameState.killedSuspects.includes(gameState.currentCase.culprit);
         
-        // Determine if the case is solved
+        // Determine if the case is solved - the culprit must be correctly identified AND killed
         const isSolved = isCorrect && isCulpritKilled;
+        
+        // If not solved, show appropriate error
+        if (isCorrect && !isCulpritKilled) {
+            alert(translate('culpritNotKilled'));
+            return;
+        }
         
         // Show results
         showResults(isSolved);
@@ -593,31 +614,75 @@ function attemptSolve() {
 function checkDeathNoteTarget(name) {
     if (!gameState.currentCase) return;
     
-    // Find the suspect
-    const suspect = gameState.currentCase.suspects.find(s => 
-        s.name.toLowerCase() === name.toLowerCase()
-    );
+    // Normalize the input name
+    const normalizedInputName = name.toLowerCase().trim();
     
-    if (suspect) {
+    // Get the current language
+    const currentLang = typeof window.getLanguage === 'function' ? window.getLanguage() : 'en';
+    
+    // Find the suspect - check all suspects regardless of language
+    let matchedSuspect = null;
+    
+    // Try to find the suspect by comparing normalized names
+    for (const suspect of gameState.currentCase.suspects) {
+        // Normalize the suspect name
+        const suspectName = suspect.name.toLowerCase().trim();
+        
+        // Check if names match
+        if (suspectName === normalizedInputName) {
+            matchedSuspect = suspect;
+            break;
+        }
+        
+        // For non-English versions, also check if the name approximately matches
+        // (handles slight variations in spelling or transliteration)
+        if (currentLang !== 'en' && 
+            (suspectName.includes(normalizedInputName) || 
+             normalizedInputName.includes(suspectName))) {
+            matchedSuspect = suspect;
+            break;
+        }
+    }
+    
+    if (matchedSuspect) {
         // Mark as killed
-        gameState.killedSuspects.push(suspect.name);
+        gameState.killedSuspects.push(matchedSuspect.name);
         
         // Show notification
+        const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
         const notification = document.createElement('div');
         notification.className = 'death-note-notification';
-        notification.textContent = `${suspect.name} has died of a heart attack.`;
+        notification.textContent = `${matchedSuspect.name} ${translate('hasDiedOfHeartAttack')}`;
         document.body.appendChild(notification);
         
-        // Remove notification after a few seconds
+        // Remove notification after 3 seconds
         setTimeout(() => {
             notification.remove();
         }, 3000);
         
-        // If innocent person killed, penalize
-        if (!suspect.isGuilty) {
-            consumeDay(2); // Penalty: lose 2 days
+        // Decrease available uses
+        if (gameState.deathNoteUses > 0) {
+            gameState.deathNoteUses--;
         }
+        
+        // Update UI
+        // Use safely: check if updateDeathNoteUses is defined in global scope
+        if (typeof window.updateDeathNoteUses === 'function') {
+            window.updateDeathNoteUses();
+        } else if (typeof updateDeathNoteUses === 'function') {
+            updateDeathNoteUses();
+        }
+        
+        // If an innocent person was killed, apply penalty
+        if (!matchedSuspect.isGuilty) {
+            // Penalty: lose additional days
+            consumeDay(2);
+        }
+        
+        return true;
     }
+    
+    return false;
 }
 
 // Consume days and check for game over

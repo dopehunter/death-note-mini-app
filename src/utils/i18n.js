@@ -90,6 +90,11 @@ const translations = {
         cancel: 'Cancel',
         selectSuspect: 'Please select a suspect',
         closeDeathNote: 'Close Death Note',
+        
+        // New validation messages
+        hasDiedOfHeartAttack: 'has died of a heart attack.',
+        mustUseDeathNoteFirst: 'You must use the Death Note to eliminate the culprit before solving the case.',
+        culpritNotKilled: 'You have identified the correct culprit, but you need to eliminate them with the Death Note first.',
     },
     
     // Russian
@@ -171,6 +176,11 @@ const translations = {
         cancel: 'Отмена',
         selectSuspect: 'Пожалуйста, выберите подозреваемого',
         closeDeathNote: 'Закрыть Тетрадь Смерти',
+        
+        // New validation messages
+        hasDiedOfHeartAttack: 'умер от сердечного приступа.',
+        mustUseDeathNoteFirst: 'Вы должны использовать Тетрадь Смерти для устранения преступника, прежде чем решить дело.',
+        culpritNotKilled: 'Вы определили правильного преступника, но сначала вам нужно устранить его с помощью Тетради Смерти.',
     },
     
     // German
@@ -252,6 +262,11 @@ const translations = {
         cancel: 'Abbrechen',
         selectSuspect: 'Bitte wählen Sie einen Verdächtigen aus',
         closeDeathNote: 'Death Note schließen',
+        
+        // New validation messages
+        hasDiedOfHeartAttack: 'ist an einem Herzinfarkt gestorben.',
+        mustUseDeathNoteFirst: 'Sie müssen das Death Note benutzen, um den Täter zu eliminieren, bevor Sie den Fall lösen können.',
+        culpritNotKilled: 'Sie haben den richtigen Täter identifiziert, aber Sie müssen ihn zuerst mit dem Death Note eliminieren.',
     }
 };
 
