@@ -258,22 +258,28 @@ function showResults(solved) {
 function nextCase() {
     // Get the current case ID
     const currentCaseId = gameState?.currentCase?.id || 0;
+    console.log("Current case ID:", currentCaseId);
     
     // Calculate the next case ID (increment by 1)
     const nextCaseId = currentCaseId + 1;
+    console.log("Next case ID:", nextCaseId);
     
     // Get all available cases
     const allCases = getCases();
+    console.log("Available cases:", allCases.length, "Current language:", getLanguage());
+    console.log("Case IDs:", allCases.map(c => c.id));
     
     // Check if the next case exists
     const nextCaseExists = allCases.some(c => c.id === nextCaseId);
+    console.log("Next case exists:", nextCaseExists);
     
     if (nextCaseExists) {
         // Hide the results screen
         document.getElementById('resultsScreen').classList.add('hide');
         
         // Load the next case
-        loadCase(nextCaseId);
+        const nextCase = loadCase(nextCaseId);
+        console.log("Loaded next case:", nextCase ? nextCase.title : "Failed to load case");
         
         // Show the game screen
         hideAllScreens();

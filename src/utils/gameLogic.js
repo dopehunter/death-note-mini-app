@@ -326,7 +326,24 @@ window.caseTranslations = caseTranslations;
 // Get current cases based on language
 function getCases() {
     const currentLang = typeof window.getLanguage === 'function' ? window.getLanguage() : 'en';
-    return caseTranslations[currentLang] || caseTranslations.en;
+    console.log("getCases called - current language:", currentLang);
+    
+    // Debug case counts in each language
+    console.log("Case counts by language:", {
+        en: caseTranslations.en?.length || 0,
+        ru: caseTranslations.ru?.length || 0,
+        de: caseTranslations.de?.length || 0
+    });
+    
+    // Ensure Russian cases have correct IDs
+    if (currentLang === 'ru') {
+        console.log("Russian cases:", caseTranslations.ru.map(c => ({ id: c.id, title: c.title })));
+    }
+    
+    // Make sure both cases are actually present for each language
+    const casesForCurrentLang = caseTranslations[currentLang] || caseTranslations.en;
+    console.log("Returning cases for", currentLang, ":", casesForCurrentLang.length);
+    return casesForCurrentLang;
 }
 
 // Make getCases function globally accessible
@@ -350,16 +367,34 @@ function initGame() {
 
 // Load a specific case
 function loadCase(caseId) {
+    console.log(`loadCase(${caseId}) called - current language: ${getLanguage()}`);
+    
     // Force refresh case data based on current language
     const currentCases = getCases();
+    console.log("Available cases:", currentCases.map(c => `ID: ${c.id}, Title: ${c.title}`));
+    
     // Find the case
     const caseData = currentCases.find(c => c.id === caseId);
     
     if (!caseData) {
-        console.error(`Case with ID ${caseId} not found`);
-        return;
+        console.error(`Case with ID ${caseId} not found in language ${getLanguage()}`);
+        // Try to find the case in the default English locale if it's missing in current locale
+        if (getLanguage() !== 'en') {
+            console.log("Trying to find case in English as fallback...");
+            const englishCaseData = caseTranslations.en.find(c => c.id === caseId);
+            if (englishCaseData) {
+                console.log("Case found in English, using as fallback");
+                return loadCaseWithData(englishCaseData);
+            }
+        }
+        return null;
     }
     
+    return loadCaseWithData(caseData);
+}
+
+// Helper function to load a case using case data
+function loadCaseWithData(caseData) {
     // Reset game state for the new case
     gameState.currentCase = caseData;
     gameState.daysLeft = caseData.days;
@@ -370,12 +405,16 @@ function loadCase(caseId) {
     document.getElementById('caseTitle').textContent = caseData.title;
     
     // Update the days left and Death Note uses display
-    updateDynamicContent();
+    if (typeof window.updateDynamicContent === 'function') {
+        window.updateDynamicContent();
+    } else if (typeof updateDynamicContent === 'function') {
+        updateDynamicContent();
+    }
     
     // Load the case board
     loadCaseBoard(caseData);
     
-    console.log(`Case ${caseId} loaded:`, caseData.title);
+    console.log(`Case ${caseData.id} loaded:`, caseData.title);
     
     return caseData;
 }
