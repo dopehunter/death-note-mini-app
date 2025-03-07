@@ -464,4 +464,105 @@ body {
 
 .shake {
     animation: shake 0.5s ease-in-out;
+}
+
+/* Language selection styles */
+.language-switcher {
+    position: relative;
+    margin-left: 15px;
+}
+
+.lang-button {
+    background-color: transparent;
+    border: 1px solid var(--dn-light-gray);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--dn-white);
+    transition: all 0.3s ease;
+}
+
+.lang-button:hover {
+    background-color: var(--dn-light-gray);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--dn-gray);
+    border: 1px solid var(--dn-light-gray);
+    border-radius: 4px;
+    width: 120px;
+    z-index: 10;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.lang-option {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    text-align: left;
+    background-color: transparent;
+    border: none;
+    color: var(--dn-white);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.lang-option:hover {
+    background-color: var(--dn-light-gray);
+}
+
+/* Language selection screen */
+.language-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+    align-items: center;
+}
+
+.lang-select-button {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 25px;
+    background-color: var(--dn-gray);
+    border: 1px solid var(--dn-light-gray);
+    border-radius: 8px;
+    color: var(--dn-white);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 200px;
+}
+
+.lang-select-button:hover {
+    background-color: var(--dn-light-gray);
+    transform: translateY(-2px);
+}
+
+.lang-select-button .flag {
+    font-size: 24px;
+}
+
+#languageScreen h1 {
+    color: var(--dn-red);
+    font-family: var(--font-gothic);
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .language-buttons {
+        flex-direction: row;
+        justify-content: center;
+    }
 } 

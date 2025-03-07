@@ -159,6 +159,30 @@ function loadCase(caseId) {
     console.log(`Case ${caseId} loaded:`, caseData);
 }
 
+// Get case description based on current language
+function getCaseDescription(caseData) {
+    const lang = getLanguage();
+    
+    // Case descriptions in different languages
+    const descriptions = {
+        // Case 1
+        1: {
+            en: "A series of murders has occurred in Tokyo. All victims died of heart attacks, but they were all criminals who had escaped justice. The police are baffled.",
+            ru: "В Токио произошла серия убийств. Все жертвы умерли от сердечных приступов, и все они были преступниками, избежавшими правосудия. Полиция в недоумении.",
+            de: "In Tokio hat sich eine Reihe von Morden ereignet. Alle Opfer starben an Herzinfarkten, und alle waren Kriminelle, die der Justiz entkommen waren. Die Polizei ist ratlos."
+        },
+        // Case 2
+        2: {
+            en: "CEOs of competing companies are dying in mysterious accidents. All companies are now being acquired by Yotsuba Group.",
+            ru: "Генеральные директора конкурирующих компаний погибают в загадочных авариях. Все компании теперь приобретаются группой Ёцуба.",
+            de: "CEOs konkurrierender Unternehmen sterben bei mysteriösen Unfällen. Alle Unternehmen werden nun von der Yotsuba-Gruppe übernommen."
+        }
+    };
+    
+    // Return the description in the current language or English as fallback
+    return descriptions[caseData.id]?.[lang] || descriptions[caseData.id]?.en || caseData.description;
+}
+
 // Load the case board with case description
 function loadCaseBoard(caseData) {
     const caseBoard = document.getElementById('caseBoard');
@@ -167,16 +191,21 @@ function loadCaseBoard(caseData) {
     // Case description
     const description = document.createElement('div');
     description.className = 'case-description';
+    
+    // Use translated case description
+    const translatedDescription = getCaseDescription(caseData);
+    
+    // Use translations for the content
     description.innerHTML = `
-        <h3>Case Brief</h3>
-        <p>${caseData.description}</p>
+        <h3>${translate('caseBrief')}</h3>
+        <p>${translatedDescription}</p>
         <div class="case-instructions">
-            <p>As Light Yagami, your goal is to:</p>
+            <p>${translate('caseBriefText')}</p>
             <ol>
-                <li>Review the evidence carefully</li>
-                <li>Identify the culprit among the suspects</li>
-                <li>Use the Death Note to eliminate the culprit</li>
-                <li>Solve the case within the time limit</li>
+                <li>${translate('caseBriefItem1')}</li>
+                <li>${translate('caseBriefItem2')}</li>
+                <li>${translate('caseBriefItem3')}</li>
+                <li>${translate('caseBriefItem4')}</li>
             </ol>
         </div>
     `;

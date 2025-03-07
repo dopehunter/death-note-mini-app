@@ -14,36 +14,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the game
     initGame();
     
-    // Show the game interface after a short loading delay
-    setTimeout(() => {
-        document.getElementById('loading').classList.add('hide');
-        document.getElementById('menuScreen').classList.remove('hide');
-        document.getElementById('menuScreen').classList.add('fade-in');
-        
-        // Get user info from Telegram if available
-        if (telegramApp) {
-            const user = telegramApp.initDataUnsafe?.user;
-            if (user) {
-                const userInfoElement = document.getElementById('userInfo');
-                userInfoElement.textContent = `Player: ${user.first_name || 'Kira'}`;
-            }
-            
-            // Set Telegram theme
-            document.body.style.setProperty('--dn-black', telegramApp.themeParams.bg_color || '#0a0a0a');
-            document.body.style.setProperty('--dn-white', telegramApp.themeParams.text_color || '#f0f0f0');
-            
-            // Expand the app to fullscreen
-            telegramApp.expand();
-            
-            // Set main button for actions later
-            telegramApp.MainButton.setParams({
-                text: 'JOIN THE GAME',
-                color: '#b20000',
-                text_color: '#ffffff',
-                is_visible: false
-            });
+    // Get user info from Telegram if available
+    if (telegramApp) {
+        const user = telegramApp.initDataUnsafe?.user;
+        if (user) {
+            const userInfoElement = document.getElementById('userInfo');
+            userInfoElement.textContent = `${user.first_name || 'Kira'}`;
         }
-    }, 2000);
+        
+        // Set Telegram theme
+        document.body.style.setProperty('--dn-black', telegramApp.themeParams.bg_color || '#0a0a0a');
+        document.body.style.setProperty('--dn-white', telegramApp.themeParams.text_color || '#f0f0f0');
+        
+        // Expand the app to fullscreen
+        telegramApp.expand();
+        
+        // Set main button for actions later
+        telegramApp.MainButton.setParams({
+            text: translate('startGame'),
+            color: '#b20000',
+            text_color: '#ffffff',
+            is_visible: false
+        });
+    }
+    
+    // Update the main button when language changes
+    document.addEventListener('languageChanged', (e) => {
+        if (telegramApp) {
+            telegramApp.MainButton.setText(translate('startGame'));
+        }
+        
+        // Update dynamic content that might not have data-i18n attributes
+        updateDynamicContent();
+    });
 });
 
 // Initialize app event listeners
@@ -75,12 +78,14 @@ function initApp() {
 function showRules() {
     hideAllScreens();
     document.getElementById('rulesScreen').classList.remove('hide');
+    updateBackButton();
 }
 
 // Go back from rules to menu
 function backFromRules() {
     hideAllScreens();
     document.getElementById('menuScreen').classList.remove('hide');
+    updateBackButton();
 }
 
 // Close the app and return to chat
@@ -96,6 +101,7 @@ function startGame() {
     hideAllScreens();
     document.getElementById('gameScreen').classList.remove('hide');
     loadCase(1); // Load the first case
+    updateBackButton();
 }
 
 // Hide all screens
@@ -111,10 +117,10 @@ function toggleDeathNote() {
     const deathNotePanel = document.getElementById('deathNotePanel');
     if (deathNotePanel.classList.contains('hide')) {
         deathNotePanel.classList.remove('hide');
-        document.getElementById('useDeathNoteBtn').textContent = 'Close Death Note';
+        document.getElementById('useDeathNoteBtn').textContent = translate('closeDeathNote');
     } else {
         deathNotePanel.classList.add('hide');
-        document.getElementById('useDeathNoteBtn').textContent = 'Use Death Note';
+        document.getElementById('useDeathNoteBtn').textContent = translate('useDeathNote');
     }
 }
 
@@ -147,7 +153,16 @@ function updateDeathNoteUses() {
     const usesElement = document.getElementById('noteUses');
     const currentUses = parseInt(usesElement.textContent.split(': ')[1]);
     if (currentUses > 0) {
-        usesElement.textContent = `Death Note uses: ${currentUses - 1}`;
+        const newUses = currentUses - 1;
+        
+        // Update with translated template
+        if (getLanguage() === 'en') {
+            usesElement.textContent = `Death Note uses: ${newUses}`;
+        } else if (getLanguage() === 'ru') {
+            usesElement.textContent = `Использований Тетради: ${newUses}`;
+        } else if (getLanguage() === 'de') {
+            usesElement.textContent = `Death Note Verwendungen: ${newUses}`;
+        }
     }
     
     // Disable the Death Note if no uses left
@@ -166,25 +181,26 @@ function showResults(solved) {
     
     if (solved) {
         const successMessage = document.createElement('h3');
-        successMessage.textContent = 'Case Solved Successfully!';
+        successMessage.textContent = translate('caseSolved');
         successMessage.style.color = '#4CAF50';
         resultsSummary.appendChild(successMessage);
         
         const detailsMessage = document.createElement('p');
-        detailsMessage.textContent = 'You have eliminated the criminal and brought justice to the world.';
+        detailsMessage.textContent = translate('caseSolvedText');
         resultsSummary.appendChild(detailsMessage);
     } else {
         const failureMessage = document.createElement('h3');
-        failureMessage.textContent = 'Case Failed';
+        failureMessage.textContent = translate('caseFailed');
         failureMessage.style.color = '#b20000';
         resultsSummary.appendChild(failureMessage);
         
         const detailsMessage = document.createElement('p');
-        detailsMessage.textContent = 'You failed to identify the true criminal or eliminated an innocent person.';
+        detailsMessage.textContent = translate('caseFailedText');
         resultsSummary.appendChild(detailsMessage);
     }
     
     document.getElementById('resultsScreen').classList.remove('hide');
+    updateBackButton();
 }
 
 // Go to the next case
@@ -200,7 +216,8 @@ function shareResults() {
         telegramApp.sendData(JSON.stringify({
             action: 'share_results',
             case_solved: true, // Replace with actual result
-            case_id: 1 // Replace with actual case ID
+            case_id: 1, // Replace with actual case ID
+            language: getLanguage() // Include the language
         }));
     }
 }
@@ -209,4 +226,66 @@ function shareResults() {
 function returnToMenu() {
     hideAllScreens();
     document.getElementById('menuScreen').classList.remove('hide');
+    updateBackButton();
+}
+
+// Update Telegram back button based on current screen
+function updateBackButton() {
+    const telegramApp = window.Telegram?.WebApp;
+    if (!telegramApp) return;
+    
+    const currentScreen = getCurrentScreen();
+    
+    if (currentScreen === 'menuScreen' || currentScreen === 'loadingScreen' || currentScreen === 'languageScreen') {
+        telegramApp.BackButton.hide();
+    } else {
+        telegramApp.BackButton.show();
+    }
+}
+
+// Get current screen
+function getCurrentScreen() {
+    if (!document.getElementById('loading').classList.contains('hide')) {
+        return 'loadingScreen';
+    }
+    if (!document.getElementById('languageScreen').classList.contains('hide')) {
+        return 'languageScreen';
+    }
+    if (!document.getElementById('menuScreen').classList.contains('hide')) {
+        return 'menuScreen';
+    }
+    if (!document.getElementById('gameScreen').classList.contains('hide')) {
+        return 'gameScreen';
+    }
+    if (!document.getElementById('rulesScreen').classList.contains('hide')) {
+        return 'rulesScreen';
+    }
+    if (!document.getElementById('resultsScreen').classList.contains('hide')) {
+        return 'resultsScreen';
+    }
+    
+    return null;
+}
+
+// Update dynamic content that can't use data-i18n
+function updateDynamicContent() {
+    // Update dynamic texts that depend on values (like days left, note uses, etc.)
+    const currentCase = gameState?.currentCase;
+    if (currentCase) {
+        document.getElementById('daysLeft').textContent = 
+            getLanguage() === 'en' ? `Days left: ${gameState.daysLeft}` :
+            getLanguage() === 'ru' ? `Осталось дней: ${gameState.daysLeft}` :
+            `Verbleibende Tage: ${gameState.daysLeft}`;
+            
+        document.getElementById('noteUses').textContent = 
+            getLanguage() === 'en' ? `Death Note uses: ${gameState.deathNoteUses}` :
+            getLanguage() === 'ru' ? `Использований Тетради: ${gameState.deathNoteUses}` :
+            `Death Note Verwendungen: ${gameState.deathNoteUses}`;
+    }
+    
+    // Update Death Note button text if panel is open
+    const deathNotePanel = document.getElementById('deathNotePanel');
+    if (!deathNotePanel.classList.contains('hide')) {
+        document.getElementById('useDeathNoteBtn').textContent = translate('closeDeathNote');
+    }
 } 
