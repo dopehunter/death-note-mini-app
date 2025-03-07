@@ -286,4 +286,30 @@ function updateDynamicContent() {
     if (!deathNotePanel.classList.contains('hide')) {
         document.getElementById('useDeathNoteBtn').textContent = translate('closeDeathNote');
     }
-} 
+}
+
+// Set up language change event listener
+document.addEventListener('languageChanged', function() {
+    // Update the main button
+    const telegramApp = window.Telegram?.WebApp;
+    if (telegramApp?.MainButton) {
+        telegramApp.MainButton.setText(translate('startGame'));
+    }
+    
+    // Update all dynamic content that doesn't use data-i18n
+    updateDynamicContent();
+    
+    // If we're inside a case, reload the current case with new language data
+    if (gameState?.currentCase) {
+        // Store current case ID
+        const currentCaseId = gameState.currentCase.id;
+        // Reload case with the current language
+        loadCase(currentCaseId);
+        // Update view based on current screen
+        const currentScreen = getCurrentScreen();
+        if (currentScreen === 'gameScreen') {
+            // If in game screen, refresh case board
+            loadCaseBoard(gameState.currentCase);
+        }
+    }
+}); 

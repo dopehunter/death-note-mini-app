@@ -3,8 +3,8 @@
  * Game Logic Module
  */
 
-// Import translation utilities
-const { getLanguage, translate } = window;
+// We'll access translation utilities from global scope when needed
+// NOT at import time because they may not be available yet
 
 // Game state
 let gameState = {
@@ -322,8 +322,9 @@ const caseTranslations = {
 
 // Get current cases based on language
 function getCases() {
-    const lang = getLanguage();
-    return caseTranslations[lang] || caseTranslations.en;
+    // Get language at function call time, not at module load time
+    const currentLang = typeof window.getLanguage === 'function' ? window.getLanguage() : 'en';
+    return caseTranslations[currentLang] || caseTranslations.en;
 }
 
 // Initialize the game
@@ -344,11 +345,13 @@ function initGame() {
 
 // Load a specific case
 function loadCase(caseId) {
+    // Force refresh case data based on current language
+    const currentCases = getCases();
     // Find the case
-    const caseData = getCases().find(c => c.id === caseId);
+    const caseData = currentCases.find(c => c.id === caseId);
     
     if (!caseData) {
-        console.error(`Case ${caseId} not found`);
+        console.error(`Case with ID ${caseId} not found`);
         return;
     }
     
@@ -373,29 +376,20 @@ function loadCase(caseId) {
 
 // Get case description based on current language
 function getCaseDescription(caseData) {
-    const lang = getLanguage();
+    const lang = typeof window.getLanguage === 'function' ? window.getLanguage() : 'en';
     
     // Case descriptions in different languages
     const descriptions = {
-        // Case 1
-        1: {
-            en: "A series of murders has occurred in Tokyo. All victims died of heart attacks, but they were all criminals who had escaped justice. The police are baffled.",
-            ru: "В Токио произошла серия убийств. Все жертвы умерли от сердечных приступов, и все они были преступниками, избежавшими правосудия. Полиция в недоумении.",
-            de: "In Tokio hat sich eine Reihe von Morden ereignet. Alle Opfer starben an Herzinfarkten, und alle waren Kriminelle, die der Justiz entkommen waren. Die Polizei ist ratlos."
-        },
-        // Case 2
-        2: {
-            en: "CEOs of competing companies are dying in mysterious accidents. All companies are now being acquired by Yotsuba Group.",
-            ru: "Генеральные директора конкурирующих компаний погибают в загадочных авариях. Все компании теперь приобретаются группой Ёцуба.",
-            de: "CEOs konkurrierender Unternehmen sterben bei mysteriösen Unfällen. Alle Unternehmen werden nun von der Yotsuba-Gruppe übernommen."
-        }
+        en: `${caseData.description}`,
+        ru: `${caseData.description}`,
+        de: `${caseData.description}`
     };
     
-    // Return the description in the current language or English as fallback
-    return descriptions[caseData.id]?.[lang] || descriptions[caseData.id]?.en || caseData.description;
+    // Return description in current language, or fall back to English
+    return descriptions[lang] || descriptions.en;
 }
 
-// Load the case board with case description
+// Display the case board with information
 function loadCaseBoard(caseData) {
     const caseBoard = document.getElementById('caseBoard');
     caseBoard.innerHTML = '';
@@ -403,6 +397,9 @@ function loadCaseBoard(caseData) {
     // Case description
     const description = document.createElement('div');
     description.className = 'case-description';
+    
+    // Get translate function safely
+    const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
     // Use translated case description
     const translatedDescription = getCaseDescription(caseData);
@@ -427,6 +424,9 @@ function loadCaseBoard(caseData) {
 // View evidence for the current case
 function viewEvidence() {
     if (!gameState.currentCase) return;
+    
+    // Get translate function safely
+    const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
     const caseBoard = document.getElementById('caseBoard');
     caseBoard.innerHTML = '';
@@ -466,6 +466,9 @@ function viewEvidence() {
 // View suspects for the current case
 function viewSuspects() {
     if (!gameState.currentCase) return;
+    
+    // Get translate function safely
+    const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
     const caseBoard = document.getElementById('caseBoard');
     caseBoard.innerHTML = '';
@@ -522,6 +525,9 @@ function viewSuspects() {
 // Attempt to solve the case
 function attemptSolve() {
     if (!gameState.currentCase) return;
+    
+    // Get translate function safely
+    const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
     const caseBoard = document.getElementById('caseBoard');
     caseBoard.innerHTML = '';
