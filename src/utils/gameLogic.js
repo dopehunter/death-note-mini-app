@@ -482,6 +482,31 @@ function loadCaseBoard(caseData) {
         </div>
     `;
     caseBoard.appendChild(description);
+    
+    // Populate the Death Note dropdown with suspects
+    populateDeathNoteDropdown(caseData.suspects);
+}
+
+// Function to populate the Death Note dropdown with suspects
+function populateDeathNoteDropdown(suspects) {
+    const dropdown = document.getElementById('nameInput');
+    if (!dropdown) return;
+    
+    // Clear existing options except the first one (prompt)
+    while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+    }
+    
+    // Add each suspect as an option
+    suspects.forEach(suspect => {
+        // Skip suspects who are already killed
+        if (gameState.killedSuspects.includes(suspect.name)) return;
+        
+        const option = document.createElement('option');
+        option.value = suspect.name;
+        option.textContent = suspect.name;
+        dropdown.appendChild(option);
+    });
 }
 
 // View evidence for the current case
@@ -592,12 +617,8 @@ function attemptSolve() {
     // Get translate function safely
     const translate = typeof window.translate === 'function' ? window.translate : (key) => key;
     
-    // Validate that player has used Death Note at least once - 
-    // either the culprit must be killed or they've used at least one Death Note use
-    const hasUsedDeathNote = gameState.killedSuspects.length > 0 || 
-                             gameState.deathNoteUses < gameState.currentCase.deathNoteUses;
-    
-    if (!hasUsedDeathNote) {
+    // Check if any suspect has been killed with the Death Note
+    if (gameState.killedSuspects.length === 0) {
         alert(translate('mustUseDeathNoteFirst'));
         return;
     }
@@ -610,67 +631,72 @@ function attemptSolve() {
     header.textContent = translate('solveCase');
     caseBoard.appendChild(header);
     
-    // Create solve form
-    const solveForm = document.createElement('div');
-    solveForm.className = 'solve-form';
-    solveForm.innerHTML = `
-        <p>${translate('chooseCulprit')}</p>
-        <div class="suspect-options">
-            ${gameState.currentCase.suspects.map(suspect => {
-                const isKilled = gameState.killedSuspects.includes(suspect.name);
-                // Important change: Allow selecting killed suspects - only disable non-killed non-culprits
-                const isDisabled = false; // No suspects should be disabled for selection
-                return `
-                <div class="suspect-option ${isKilled ? 'killed' : ''}">
-                    <input type="radio" id="suspect-${suspect.id}" name="culprit" value="${suspect.name}" ${isDisabled ? 'disabled' : ''}>
-                    <label for="suspect-${suspect.id}">${suspect.name} ${isKilled ? `(${translate('deceased')})` : ''}</label>
-                </div>
-                `;
-            }).join('')}
-        </div>
-        <button id="submitSolution" class="main-button">${translate('submitSolution')}</button>
-    `;
-    caseBoard.appendChild(solveForm);
+    // Create explanation text
+    const explanation = document.createElement('p');
+    explanation.className = 'solve-explanation';
+    explanation.textContent = translate('solveExplanation');
+    caseBoard.appendChild(explanation);
     
-    // Add back button
-    const backButton = document.createElement('button');
-    backButton.className = 'secondary-button';
-    backButton.textContent = translate('cancel');
-    backButton.addEventListener('click', () => loadCaseBoard(gameState.currentCase));
-    caseBoard.appendChild(backButton);
+    // Create suspects list with animation
+    const suspectsList = document.createElement('div');
+    suspectsList.className = 'suspects-list solving';
     
-    // Add event listener for the submit button
-    document.getElementById('submitSolution').addEventListener('click', () => {
-        const selectedCulprit = document.querySelector('input[name="culprit"]:checked')?.value;
+    // Add all suspects to the list
+    gameState.currentCase.suspects.forEach(suspect => {
+        const isKilled = gameState.killedSuspects.includes(suspect.name);
+        const suspectItem = document.createElement('div');
+        suspectItem.className = `suspect-solving-item ${isKilled ? 'killed' : ''}`;
+        suspectItem.innerHTML = `
+            <span class="suspect-name">${suspect.name}</span>
+            ${isKilled ? `<span class="death-status">(${translate('deceased')})</span>` : ''}
+        `;
+        suspectsList.appendChild(suspectItem);
         
-        if (!selectedCulprit) {
-            alert(translate('selectSuspect'));
-            return;
-        }
-        
-        // Check if the selected culprit is correct
-        const isCorrect = selectedCulprit === gameState.currentCase.culprit;
-        
-        // Check if the culprit is dead
-        const isCulpritKilled = gameState.killedSuspects.includes(gameState.currentCase.culprit);
-        
-        // Determine if the case is solved - the culprit must be correctly identified AND killed
-        const isSolved = isCorrect && isCulpritKilled;
-        
-        // If not solved, show appropriate error
-        if (isCorrect && !isCulpritKilled) {
-            alert(translate('culpritNotKilled'));
-            return;
-        }
-        
-        // Show results
-        showResults(isSolved);
-        
-        // Update game state
-        if (isSolved) {
-            gameState.casesSolved++;
+        // If this suspect was killed, apply strikethrough animation after a short delay
+        if (isKilled) {
+            setTimeout(() => {
+                const nameElement = suspectItem.querySelector('.suspect-name');
+                nameElement.classList.add('strikethrough');
+                
+                // Add death status with animation
+                const statusElement = suspectItem.querySelector('.death-status');
+                statusElement.classList.add('fade-in');
+                
+                // Check if this is the correct culprit and show animation
+                const isCorrectCulprit = suspect.name === gameState.currentCase.culprit;
+                setTimeout(() => {
+                    suspectItem.classList.add(isCorrectCulprit ? 'correct-choice' : 'wrong-choice');
+                }, 1000);
+            }, 500);
         }
     });
+    
+    caseBoard.appendChild(suspectsList);
+    
+    // Add confirm button - appears after animation
+    setTimeout(() => {
+        const confirmButton = document.createElement('button');
+        confirmButton.className = 'main-button fade-in';
+        confirmButton.textContent = translate('confirmSolution');
+        confirmButton.addEventListener('click', () => {
+            // Check if the culprit was killed
+            const isCulpritKilled = gameState.killedSuspects.includes(gameState.currentCase.culprit);
+            showResults(isCulpritKilled);
+            
+            // Update game state if solved
+            if (isCulpritKilled) {
+                gameState.casesSolved++;
+            }
+        });
+        caseBoard.appendChild(confirmButton);
+        
+        // Add back button
+        const backButton = document.createElement('button');
+        backButton.className = 'secondary-button fade-in';
+        backButton.textContent = translate('cancel');
+        backButton.addEventListener('click', () => loadCaseBoard(gameState.currentCase));
+        caseBoard.appendChild(backButton);
+    }, 2500);
 }
 
 // Check if a name written in the Death Note matches a suspect
@@ -761,4 +787,7 @@ function consumeDay(days = 1) {
         // Time's up!
         showResults(false);
     }
+}
+
+// Make sure we have a fadeIn keyframe animation
 } 

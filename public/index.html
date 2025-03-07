@@ -77,7 +77,10 @@
                             <h3 data-i18n="deathNote">Death Note</h3>
                             <p class="note-rules" data-i18n="noteRules">The human whose name is written in this note shall die.</p>
                             <div class="name-input-area">
-                                <input type="text" id="nameInput" data-i18n-placeholder="writeNameHere" placeholder="Write name here...">
+                                <select id="nameInput" class="suspect-dropdown">
+                                    <option value="" data-i18n="selectSuspectPrompt">-- Select a suspect --</option>
+                                    <!-- Options will be populated via JavaScript -->
+                                </select>
                                 <button id="writeNameBtn" data-i18n="write">Write</button>
                             </div>
                             <div id="writtenNames" class="written-names">
